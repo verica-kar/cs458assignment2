@@ -4,7 +4,12 @@
 
 package assignment2.cs458assignment2;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Dictionary;
+import java.util.List;
 import java.util.Scanner;
+import java.lang.Math;
 
 public class Main {
 
@@ -52,10 +57,10 @@ public class Main {
 
                 if(yesOrNo.contains("Y")){
                     System.out.println("Please enter your key by rearraging 12345: ");
-                    key = sc.nextInt();
-                    System.out.println(permutationCipher(plaintext, key));
+                    ArrayList<Integer> pcKey = stringToList(sc2.nextLine());
+                    System.out.println(permutationCipher(plaintext, pcKey));
                 } else {
-                    System.out.println(permutationCipher(plaintext, 45132));
+                    System.out.println(permutationCipher(plaintext, new ArrayList<Integer>(Arrays.asList(4, 5, 1, 3, 2))));
                 }
                 break;
         
@@ -77,11 +82,33 @@ public class Main {
             case 4:
                 System.out.println("Please Enter your plaintext: ");
                 plaintext = sc2.nextLine();
+                System.out.println("Would you like to enter a key? Y/N ");
+                yesOrNo = sc2.nextLine();
+
+                if(yesOrNo.contains("Y")){
+                    System.out.println("Please enter your row key (i.e. for (3,2,1) enter 321): ");
+                    ArrayList<Integer> rowKey = stringToList(sc2.nextLine());
+                    System.out.println("Please enter your column key (i.e. for (4,2,3,1) enter 321): ");
+                    ArrayList<Integer> colKey = stringToList(sc2.nextLine());
+                    System.out.println(doubleTransposition(plaintext, rowKey, colKey));
+                } else {
+                    System.out.println(doubleTransposition(plaintext, new ArrayList<Integer>(Arrays.asList(3, 2, 1)), new ArrayList<Integer>(Arrays.asList(4, 2, 1, 3))));
+                }
                 break;
 
             case 5:
                 System.out.println("Please Enter your plaintext: ");
                 plaintext = sc2.nextLine();
+                System.out.println("Would you like to enter a key? Y/N ");
+                yesOrNo = sc2.nextLine();
+
+                if(yesOrNo.contains("Y")){
+                    System.out.println("Please enter your key: ");
+                    String sKey = sc2.nextLine();
+                    System.out.println(vigenereCipher(plaintext, sKey));
+                } else {
+                    System.out.println(vigenereCipher(plaintext, "VIG"));
+                }
                 break;
 
             default:
@@ -89,6 +116,7 @@ public class Main {
         };
     }
 
+    /* CASE 1: SHIFT CIPHER */
     public static String shiftCipher(String pt, int k){
         for(int i = 0; i < pt.length(); i++){
             char let = pt.charAt(i);
@@ -116,12 +144,13 @@ public class Main {
         return ciphertext;
     }
 
-    public static String permutationCipher(String pt, int k){
+    /* CASE 2: PERMUTATION CIPHER */
+    public static String permutationCipher(String pt, ArrayList<Integer> k){
         return ciphertext;
     }
 
+    /* CASE 3: SIMPLE TRANSPOSITION */
     public static String simpleTransposition(String pt, int k){
-        String ciphertext = "";
         char[][] matrix = new char[k][k];
         int counter = 0;
 
@@ -138,17 +167,102 @@ public class Main {
                     ciphertext += String.valueOf(matrix[j][i]);
                 }
             }
+
+            matrix = new char[k][k];
         }
 
         return ciphertext;
     }
 
-    public static String doubleTransposition(String pt, int k){
+    /* CASE 4: DOUBLE TRANSPOSITION */
+    public static String doubleTransposition(String pt, ArrayList<Integer> row, ArrayList<Integer> col){
+        char[][] matrix = new char[row.size()][col.size()];
+        char[][] transposedMatrix = new char[row.size()][col.size()];
+        int counter = 0;
+
+        while(counter < (pt.length() - 1)){
+            /* populate matrix */
+            for(int i = 0; i < row.size(); i++){
+                for(int j = 0; j < col.size(); j++){
+                    matrix[i][j] = pt.charAt(counter);
+                    counter++;
+                }
+            }
+
+            /* transpose rows */
+            int rSpot;
+            for(int i = 0; i < row.size(); i++){
+                rSpot = row.get(i);
+                for(int j = 0; j < col.size(); j++){
+                    transposedMatrix[i][j] = matrix[rSpot - 1][j];
+                }
+            }
+
+            matrix = transposedMatrix;
+            transposedMatrix = new char[row.size()][col.size()];
+
+            /* transpose columns */
+            int cSpot;
+            for(int j = 0; j < col.size(); j++){
+                cSpot = col.get(j);
+                for(int i = 0; i < row.size(); i++){
+                    transposedMatrix[i][j] = matrix[i][cSpot - 1];
+                }
+            }
+
+            for(int i = 0; i < row.size(); i++){
+                for(int j = 0; j < col.size(); j++){
+                    ciphertext += String.valueOf(transposedMatrix[i][j]);
+                }
+            }
+        }
+
         return ciphertext;
     }
 
-    public static String vigenereCipher(String pt, int k){
+    /* CASE 5: VIGENERE CIPHER */
+    public static String vigenereCipher(String pt, String k){
+        ArrayList<Character> alphabet = new ArrayList<Character>(Arrays.asList('A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'));
+        pt = pt.toUpperCase().replaceAll("\\s", "");
+        int difference = (pt.length() / k.length());
+        int extra = (pt.length() % k.length());
+        String firstK = k;
+
+        /* repeat key */
+        for(int i = 1; i < difference; i++){ 
+            k += firstK;
+        }
+
+        /* add remaining letters from key if needed */
+        for(int i = 0; i < extra; i++){
+            k += String.valueOf(k.charAt(i));
+        }
+
+        /* perform vigenere cipher */
+        for(int i = 0; i < pt.length(); i++){
+            if(pt.charAt(i) == 'A'){
+                ciphertext += String.valueOf(k.charAt(i)); 
+            } else if(k.charAt(i) == 'A'){
+                ciphertext += String.valueOf(pt.charAt(i)); 
+            } else {
+                int shiftAmt = (26 - (26 - alphabet.indexOf(k.charAt(i))));
+                String chara = String.valueOf(pt.charAt(i));
+                ciphertext = shiftCipher(chara, shiftAmt);
+            }
+        }
+
         return ciphertext;
+    }
+
+    /* HELPER FUNCTIONS */
+    static ArrayList<Integer> stringToList(String list){
+        ArrayList<Integer> al = new ArrayList<>();
+
+        for(int i = 0; i < list.length(); i++){
+            al.add(Integer.valueOf(list.charAt(i)));
+        }
+
+        return al;
     }
 
 }
