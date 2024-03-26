@@ -55,7 +55,10 @@ public class Main {
             
             int selection = sc.nextInt();
 
-            String text, yesOrNo, sKey, sIV;
+            String text;
+            String yesOrNo;
+            String sKey;
+            String sIV;
             int key;
 
             if(enc){
@@ -459,6 +462,7 @@ public class Main {
             for(int i = 0; i < k; i++){
                 for(int j = 0; j < k; j++){
                     matrix[i][j] = pt.charAt(counter - 1);
+                    counter++;
                 }
             }
 
@@ -779,8 +783,8 @@ public class Main {
         for(int i = 0; i < ct.length(); i++){
             if(ct.charAt(i) == ' '){
                 plaintext += " ";
-            } else if(ct.charAt(i) == 'A'){
-                plaintext += String.valueOf(k.charAt(i)); 
+            // } else if(ct.charAt(i) == 'A'){
+            //     plaintext += String.valueOf(k.charAt(i)); 
             } else if(k.charAt(i) == 'A'){
                 plaintext += String.valueOf(ct.charAt(i)); 
             } else {
